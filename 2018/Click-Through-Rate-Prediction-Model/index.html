@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Click Through Rate Prediction Model · Vivek Jaiswal</title><meta name="description" content="Click Through Rate Prediction Model - Vivek Jaiswal"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Muli:400,300,300italic,400italic|Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic|Radley:400"><link rel="search" type="application/opensearchdescription+xml" href="https://liquidpie.github.io/atom.xml" title="Vivek Jaiswal"></head><body><div class="wrap"><header><div class="site-title-wrapper"><h1 class="site-title"><div class="logo-wrapper"><a href="/" class="home-link"><img src="/logo.png" alt="Vivek Jaiswal" class="logo"></a></div><div class="logo-image-title"><a href="/" class="home-link">"Vivek Jaiswal"</a></div></h1></div><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/lab/" target="_self" class="nav-list-link">LAB</a></li><li class="nav-list-item"><a href="/skills/" target="_self" class="nav-list-link">SKILLS</a></li><li class="nav-list-item"><a href="/blog/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="/contact/" target="_self" class="nav-list-link">CONTACT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Click Through Rate Prediction Model</h1><div class="post-info">Mar 7, 2018</div><div class="post-content"><p>Online advertising plays an important role in supporting various websites and mobile applications. Most of the major corporation in the industry today earn a major part of their revenue from advertising. Even small companies are largely supported by ads. <a href="https://en.wikipedia.org/wiki/Click-through_rate" target="_blank" rel="noopener">Click Through Rate (CTR)</a> is the ratio of users who click on a desired link to the total number of users who view the ad. In online advertising, the advertising company is usually paid only if a user clicks on the displayed advertisement. It is thus important to maximize the chances of the ad being clicked.<br><a id="more"></a></p>
+<p>The motivation of this project comes from a Kaggle competition called <strong>Display Advertising Challenge</strong> of 2014, where the goal was to predict whether an ad will be clicked, based on the traffic logs.</p>
+<p>Today, CTR estimation models are generally linear, ranging from logistic regression and Naive Bayes to FTRL logistic regression and Bayesian probit regression. All of these are based on sparse features with one-hot encoding. The advantage of linear model is they are easy to implement and provides efficient model training. The disadvantage of these linear model is their low performance and inadequacy to work with non-trivial patterns. On the other side, non-linear model can work with different combinations of features and thus predict more accurately. Gradient boosting through decision trees learn how to deal with different combinational features. The problem with these models is their inefficiency to work with complex and massive data.</p>
+<p>Deep learning has emerged as an efficient technique in computer vision, speech classification and natural language processing. Visual and textual data is said to have a spatially and temporally related, such deep structure can be used to resolve local dependency and establish a dense representation of the feature space. With this type of learning, Deep learning can also be a possible good option to work on CTR ad prediction. In our implementation, we used both the machine learning techniques to train the model and make target predictions.</p>
+<h2 id="Dataset"><a href="#Dataset" class="headerlink" title="Dataset"></a>Dataset</h2><p>The dataset used for this project is publicly available and provided by <a href="http://labs.criteo.com/" target="_blank" rel="noopener">Criteo Labs</a>. The raw data consists of two text files one each for training and testing. The training file consists of approximately 45 million records. The test file consists of approximately 6 million records.</p>
+<p>The training file has records on each newline. Each line consists of tab separated entities. These entities represent the features for each record. Every record is a set of features and a label. There are a total of 39 features. The first 13 features are continuous features and the rest are categorical. The first value in each new record is a label. All the data is anonymized and the dataset does not provide details about what each feature represents. Although we assume that some of these features represent the information about the advertisement being displayed, some might have information about the user to whom the advertisement is being displayed.</p>
+<p>One important thing to note about the dataset is that each feature contains large number of missing values. This was expected because many times the advertisement display might not have all the information about the user. Sometimes the feature might not be applicable to the user or the advertisement being displayed. We have taken care to fill in these missing values with appropriate filler information as described later in the report.</p>
+<p>All this information also applies to the test dataset except that it does not have labels.</p>
+<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><p>Challenges of CTR prediction requires special treatment to machine learning techniques and good feature engineering and selection for this huge dataset. Our approach in general is to apply three machine learning algorithms for CTR prediction: TensorFlow’s <code>Wide and Deep learning</code>, <code>Random Forest</code> and <code>Gradient Boosted Decision Trees</code>. Separate feature engineering techniques were applied for different algorithms. Finally, the accuracy was compared.</p>
+<p>Following sections provide detailed description of each of the algorithm’s implementation and how we increased the accuracy.</p>
+<h3 id="Wide-and-Deep-Learning"><a href="#Wide-and-Deep-Learning" class="headerlink" title="Wide and Deep Learning"></a>Wide and Deep Learning</h3><p>Wide and Deep Learning is an concept introduced by Google and it can be implemented using <a href="https://www.tensorflow.org/api_docs/python/tf/contrib/learn" target="_blank" rel="noopener">TF.contrib.learn</a> library. Wide and Deep Learning aims to achieve both, <em>memorization</em> and <em>generalization</em>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Memorization can be defined as learning the frequent co-occurrence of items or features and exploiting the correlation available in the historical data.</span><br><span class="line">Generalization, on the other hand, is based on transitivity of correlation and explores new features combinations that have never or rarely occurred in the past.</span><br></pre></td></tr></table></figure></p>
+<p>The Wide and Deep learning framework jointly train feed-forward neural networks with embedding and linear model. The Wide component include all the cross-product transformation of different categorical features available. For the Deep part of the model, a 8-dimensional embedding vector is learned for each categorical feature. All the embedding are concatenated with dense (continuous features). The concatenated vector is then fed into ReLU layers, and finally logistic output unit. The wide component and deep component are combined using a weighted sum of their output log odds as the prediction, which is fed to one common logistic loss function for joint training.</p>
+<img src="https://github.com/liquidpie/Click-Through-Rate-Prediction-Ad-Display/raw/master/resources/classifiers.png" width="796" height="201" title="Wide and Deep Learning Model">
+<h4 id="Data-Preprocessing"><a href="#Data-Preprocessing" class="headerlink" title="Data Preprocessing"></a>Data Preprocessing</h4><p>The data was pre-processed using Pandas library available for Python. First, the tab separated file was read into Panda’s dataframe in batches. The primary purpose was to fill all the missing values in the dataset. For continuous feature columns, the missing data in a particular column was filled using median and for categorical columns, mode was used. We also calculated the number of unique features in all the categorical columns which further helped in feature engineering.</p>
+<h4 id="Building-the-Model"><a href="#Building-the-Model" class="headerlink" title="Building the Model"></a>Building the Model</h4><p>The next step after preprocessing the data was to build the model using <a href="https://www.tensorflow.org/api_docs/python/tf/contrib/learn" target="_blank" rel="noopener">TF.contrib.learn</a> API. An important decision to make was to decide what kind of data goes into wide and deep parts of the model. Three feature transformation techniques were used before feeding the data into the model. First, all the categorical feature column data was hashed to convert the format of data from string to numerical. The bucket size for hashing was decided according to the number of unique features in the column. Second was to generate new cross-correlated columns that took care of all the feature combinations that were rarely or never seen. The last and the most important feature transformation was to convert the categorical feature columns into embedding columns. The embedding aims to reduce the sparse feature columns into dense. The wide part of the model was trained using cross-correlated and categorical feature column, while the deep part was trained on continuous feature and embedding columns. The deep part data if fed into three hidden ReLU layer.</p>
+<h3 id="Random-Forests-Implementation"><a href="#Random-Forests-Implementation" class="headerlink" title="Random Forests Implementation"></a>Random Forests Implementation</h3><p>Initially when we began working on the project, we started out with implementing a Logistic Regression model that could provide us with a numerical estimate of the probability that an advertisement will be clicked by a user. The initial accuracy of logistic regression was not high and we realized that this might not be a best approach to solve this problem. We then decided to try Random Forests.</p>
+<p>The following sub-sections describe the data processing, feature engineering, feature selection and model design of the Random Forests implementation for this work.</p>
+<h4 id="Data-Preprocessing-1"><a href="#Data-Preprocessing-1" class="headerlink" title="Data Preprocessing"></a>Data Preprocessing</h4><p>We first used the tab separated data and created a Spark RDD. We then created a new Spark DataFrame from this RDD. The initial DataFrame had all columns set to contain string data.</p>
+<h4 id="Feature-Engineering"><a href="#Feature-Engineering" class="headerlink" title="Feature Engineering"></a>Feature Engineering</h4><p>Our feature engineering mainly revolves around filling the missing values with appropriate data. Since we do not have information about the details contained in each of the columns, we decided that we need to go for a statistics based approach which will remain the same across all the features of the same type. That is, all missing values in the continuous features will have the same value regardless of what the column might represent. Same goes for the categorical features.</p>
+<p>We replaced the missing values in continuous features with the median of all the values of that column. Spark allows us to calculate the median of a column in a DataFrame and also to replace the missing values with the computed median.</p>
+<p>For categorical features we first decided to replace the missing values with the most frequent value of a column. When this implementation was executed, we realized that some columns had to many unique values and finding one value with highest frequency is consuming a lot of computing time. We thus decided to replace the missing values with the hashed representation of the word “unknown”. Consider a column that might be holding the URLs of the website that the advertisement might be displayed on. This column can have a lot of unique values as even a slight change in the URL essentially makes it a new value. In this case, it does not make much sense to try to compute the one value with highest frequency of occurrence as there might be multiple values with the same frequency.</p>
+<h4 id="Feature-Selection"><a href="#Feature-Selection" class="headerlink" title="Feature Selection"></a>Feature Selection</h4><p>After our initial training attempt on the large dataset using all features, we realized that the Random Forests model was not able to train efficiently. This might be due to the fact that the way Random Forests work internally might not work well with features having large number of unique values. We thus decided to use feature selection to reduce the number of columns and hence obtain a feature set that best described the data present.</p>
+<p>For this purpose, we used the Chi Squared Selector as implemented in Apache Spark framework. We implemented the Chi Squared Selector to work only on the categorical features. The reason is the fact that categorical features are likely to have a lot of values which are repeated multiple times in a given column. But the same might not be true for the continuous features. Since Chi Squared Selector depends on the values in the columns, it makes sense that the selector be applied only to the categorical features.</p>
+<p>The only challenge that we ran into while implementing the Chi Squared Selector is the limitation it imposes over the number of unique values in a column. The restriction imposed by Chi Squared Selector is a maximum of 10,000 unique values in a column. We had some columns which exceeded this limitation, we thus decided to skip them from feature selection but kept them in the resulting DataFrame.</p>
+<h4 id="Random-Forest-Model"><a href="#Random-Forest-Model" class="headerlink" title="Random Forest Model"></a>Random Forest Model</h4><p>Our Implementation of Random Forests is as follows, the model has a maximum tree depth of 8, good accuracy was obtained when we kept the maximum number of trees to 128. The impurity was set to use the gini impurity. One important thing to note is the number of max bins. This number was set to 2400000. This was again caused by the fact that a lot of values is some column were unique.</p>
+<h4 id="Gradient-Boosted-Trees"><a href="#Gradient-Boosted-Trees" class="headerlink" title="Gradient Boosted Trees"></a>Gradient Boosted Trees</h4><p>To improve the accuracy on the test set, we implemented Gradient Boosted Trees (GBTs). We used the GBT implementation of Apache Spark framework. According to the documentation of Apache Spark, GBTs are idle for binary classification and works well with both categorical and numerical features. The GBT model is designed to use a max iteration of 100. The results section will discuss more about the accuracy obtained by using Gradient Boosted Trees.</p>
+<h2 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h2><p>The results after evaluating the different models are below:</p>
+<h4 id="Random-Forest-GBDT-Classifier"><a href="#Random-Forest-GBDT-Classifier" class="headerlink" title="Random Forest/GBDT Classifier"></a>Random Forest/GBDT Classifier</h4><p>To evaluate the performance and predicting the target labels(Click-1/Non-Clicked-0) the model is trained with following specification:</p>
+<p><strong>Machine Specification:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Specification</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Amazon EC2 Cluster</td>
+<td style="text-align:left">m4.2xlarge machine (1 master &amp; 3 slaves)</td>
+</tr>
+<tr>
+<td style="text-align:left">Machine Memory</td>
+<td style="text-align:left">87.2 GB</td>
+</tr>
+<tr>
+<td style="text-align:left">File System</td>
+<td style="text-align:left">Apache Hadoop</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Random Forest Hyperparameter:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Specification</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Tree Depth</td>
+<td style="text-align:left">16</td>
+</tr>
+<tr>
+<td style="text-align:left">MaxBin</td>
+<td style="text-align:left">2400000</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of Tree</td>
+<td style="text-align:left">128</td>
+</tr>
+</tbody>
+</table>
+<p><strong>GBDT Classifier builds the model with below hypermeter:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Specification</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Max Iteration</td>
+<td style="text-align:left">100</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Wide-and-Deep-Tensorflow"><a href="#Wide-and-Deep-Tensorflow" class="headerlink" title="Wide and Deep Tensorflow"></a>Wide and Deep Tensorflow</h4><p><strong>Wide and Deep Model builds on single instance with below specification:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Specification</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Amazon EC2 instance</td>
+<td style="text-align:left">m4.4xlarge</td>
+</tr>
+<tr>
+<td style="text-align:left">Machine Memory</td>
+<td style="text-align:left">64Gb</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Following are model specification:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Specification</th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Wide Columns</td>
+<td style="text-align:left">C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,C13,C14,C15,C16,C17,C18,C19,C20,C21,C22,C23,C24,C25,C26</td>
+</tr>
+<tr>
+<td style="text-align:left">Deep Column</td>
+<td style="text-align:left">I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I13    C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,C13,C14,C15,C16,C17,C18,C19,C20,C21,C22,C23,C24,C25,C26</td>
+</tr>
+<tr>
+<td style="text-align:left">Hidden Layers</td>
+<td style="text-align:left">[512,256,128,64]</td>
+</tr>
+<tr>
+<td style="text-align:left">DNN Optimizer</td>
+<td style="text-align:left">AdaGrad</td>
+</tr>
+<tr>
+<td style="text-align:left">Linear Model Optimizer</td>
+<td style="text-align:left">SGD</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Accuracy"><a href="#Accuracy" class="headerlink" title="Accuracy"></a>Accuracy</h4><img src="https://github.com/liquidpie/Click-Through-Rate-Prediction-Ad-Display/raw/master/resources/accuracy.png" width="717" height="431" title="Accuracy Graph">
+<blockquote><p>This article is an excerpt from research done by my friend <strong>Dharamendra Kumar</strong> and is posted with his permission.<br>To know more about this, check project’s <a href="https://github.com/dk67604/Click-Through-Rate-Prediction-Ad-Display" target="_blank" rel="noopener">Github</a></p>
+<footer><strong>Vivek Jaiswal</strong></footer></blockquote>
+</div></article></div></main><footer><div class="paginator"><a href="/2018/Java-Reference-Types/" class="prev">PREV</a></div><div class="grid"><div class="grid-row"><div class="grid-col-1"><div class="grid-block"><ul id="social"><li><a target="_blank" href="https://www.facebook.com/vivek223" class="social-icon facebook"></a></li><li><a target="_blank" href="https://www.linkedin.com/in/vivek223" class="social-icon linkedin"></a></li><li><a target="_blank" href="https://twitter.com/vivekjaiswal22" class="social-icon twitter"></a></li></ul></div></div><div class="grid-col-2"><div class="grid-block"><p>© 2018 <a target="_blank" href="https://about.me/vjaiswal">Vivek Jaiswal</a></p></div></div></div></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script><!-- - Google Maps--><script>function initLocation() {
+    var location = {lat: 12.908136, lng: 77.647608};
+    var style = [{"featureType":"all","elementType":"geometry.fill","stylers":[{"weight":"2.00"}]},{"featureType":"all","elementType":"geometry.stroke","stylers":[{"color":"#9c9c9c"}]},{"featureType":"all","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#34495e"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#42b983"}]},{"featureType":"administrative.neighborhood","elementType":"labels.text.fill","stylers":[{"color":"#626262"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#ffffff"},{"lightness":"0"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#f9f6f6"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"lightness":"0"},{"gamma":"1"},{"color":"#dddddd"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#efefef"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#000000"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#42b983"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#afa9a0"}]}];
+    var map = new google.maps.Map(document.getElementById('location'), {
+        zoom: 5,
+        center: location,
+        styles: style,
+        zoomControl: false,
+        mapTypeControl: false,
+        scaleControl: true,
+        streetViewControl: true,
+        rotateControl: true,
+        fullscreenControl: false
+    });
+    var marker = new google.maps.Marker({
+        position: location,
+        map: map
+    });
+}
+</script><script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRG9syuItXlrvznh-y3RM3xNrcBHzlHQk&amp;callback=initLocation"></script><script src="https://d3js.org/d3.v3.min.js"></script><script src="/script/d3relationship.js"></script><script>var json = [
+    { parent: 'Java', value: '11' },
+    { parent: 'Java', value: '21' },
+    { parent: 'Java', value: '31' },
+    { parent: 'Java', value: '41' },
+    { parent: 'Java', value: '51' },
+    { parent: 'Java', value: '61' },
+    { parent: 'Java', value: '71' },
+    { parent: 'Java', value: '81' },
+    { parent: 'Python', value: '11' },
+    { parent: 'Python', value: '21' },
+    { parent: 'Python', value: '31' },
+    { parent: 'Python', value: '41' },
+    { parent: 'Javascript', value: '11' },
+    { parent: 'Javascript', value: '21' },
+    { parent: 'Javascript', value: '31' },
+    { parent: 'Javascript', value: '41' },
+    { parent: 'Javascript', value: '51' },
+    { parent: 'NodeJS', value: '11' },
+    { parent: 'NodeJS', value: '21' },
+    { parent: 'NodeJS', value: '31' },
+    { parent: 'NodeJS', value: '41' },
+    { parent: 'NodeJS', value: '51' },
+    { parent: 'jQuery', value: '11' },
+    { parent: 'jQuery', value: '21' },
+    { parent: 'jQuery', value: '31' },
+    { parent: 'jQuery', value: '41' },
+    { parent: 'Spring Boot', value: '11' },
+    { parent: 'Spring Boot', value: '21' },
+    { parent: 'Spring Boot', value: '31' },
+    { parent: 'Spring Boot', value: '41' },
+    { parent: 'Spring Boot', value: '51' },
+    { parent: 'Spring Boot', value: '61' },
+    { parent: 'Apache Camel', value: '11' },
+    { parent: 'Apache Camel', value: '21' },
+    { parent: 'Apache Camel', value: '31' },
+    { parent: 'Apache Camel', value: '41' },
+    { parent: 'Apache Camel', value: '51' },
+    { parent: 'Apache Camel', value: '61' },
+    { parent: 'Apache Camel', value: '71' },
+    { parent: 'MongoDB', value: '11' },
+    { parent: 'MongoDB', value: '21' },
+    { parent: 'MongoDB', value: '31' },
+    { parent: 'MongoDB', value: '41' },
+    { parent: 'MongoDB', value: '51' },
+    { parent: 'MongoDB', value: '61' },
+    { parent: 'Redshift', value: '11' },
+    { parent: 'Redshift', value: '21' },
+    { parent: 'Redshift', value: '31' },
+    { parent: 'Redshift', value: '41' },
+    { parent: 'Redshift', value: '51' },
+    { parent: 'Redshift', value: '61' },
+    { parent: 'PostgreSQL', value: '11' },
+    { parent: 'PostgreSQL', value: '21' },
+    { parent: 'PostgreSQL', value: '31' },
+    { parent: 'PostgreSQL', value: '41' },
+    { parent: 'PostgreSQL', value: '51' },
+    { parent: 'PostgreSQL', value: '61' },
+    { parent: 'MySQL', value: '11' },
+    { parent: 'MySQL', value: '21' },
+    { parent: 'MySQL', value: '31' },
+    { parent: 'MySQL', value: '41' },
+    { parent: 'MySQL', value: '51' },
+    { parent: 'MySQL', value: '61' },
+    { parent: 'MySQL', value: '71' },
+    { parent: 'Redis', value: '11' },
+    { parent: 'Redis', value: '21' },
+    { parent: 'Redis', value: '31' },
+    { parent: 'Redis', value: '41' },
+    { parent: 'Redis', value: '51' },
+    { parent: 'Redis', value: '61' },
+    { parent: 'Jersey', value: '11' },
+    { parent: 'Jersey', value: '21' },
+    { parent: 'Jersey', value: '31' },
+    { parent: 'Jersey', value: '41' },
+    { parent: 'Jersey', value: '51' },
+    { parent: 'Jersey', value: '61' },
+    { parent: 'Machine Learning', value: '11' },
+    { parent: 'Machine Learning', value: '21' },
+    { parent: 'Machine Learning', value: '31' }
+];
+
+var graph = d3.select('#skillgraph').relationshipGraph({
+    showTooltips: false,
+    maxChildCount: 10,
+    showKeys: false,
+    thresholds: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    colors: ['#c4ffe4', '#a6edcc', '#92e8c0', '#8ae2b9', '#75d6a9', '#71d6a7', '#61c697', '#5fce9b', '#52c490', '#42b983']
+}).data(json);</script></body></html>

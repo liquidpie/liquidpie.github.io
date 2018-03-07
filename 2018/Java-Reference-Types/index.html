@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Java Reference Types · Vivek Jaiswal</title><meta name="description" content="Java Reference Types - Vivek Jaiswal"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Muli:400,300,300italic,400italic|Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic|Radley:400"><link rel="search" type="application/opensearchdescription+xml" href="https://liquidpie.github.io/atom.xml" title="Vivek Jaiswal"></head><body><div class="wrap"><header><div class="site-title-wrapper"><h1 class="site-title"><div class="logo-wrapper"><a href="/" class="home-link"><img src="/logo.png" alt="Vivek Jaiswal" class="logo"></a></div><div class="logo-image-title"><a href="/" class="home-link">"Vivek Jaiswal"</a></div></h1></div><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/lab/" target="_self" class="nav-list-link">LAB</a></li><li class="nav-list-item"><a href="/skills/" target="_self" class="nav-list-link">SKILLS</a></li><li class="nav-list-item"><a href="/blog/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="/contact/" target="_self" class="nav-list-link">CONTACT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Java Reference Types</h1><div class="post-info">Mar 7, 2018</div><div class="post-content"><p>Do you know that Java not only have one reference type but actually four of them?</p>
+<p>Many developers are not aware of these types and what’s the advantage of having them. I’m not sure why this concept is not evident among us, since, these types are available since Java 1.2 release.</p>
+<p>Let’s deep dive into reference types to understand their usage.<br><a id="more"></a></p>
+<h2 id="Why-do-we-need-so-many-different-types"><a href="#Why-do-we-need-so-many-different-types" class="headerlink" title="Why do we need so many different types?"></a>Why do we need so many different types?</h2><p>Consider I’ve a table (such as user details) that contains data which is frequently accessed. I understand a bit about performance, so instead of dipping into database every time to fetch data from this table. I’m going to take the route of <em>Cache</em>. To simplify things, let’s go ahead with an in-memory cache like a <em>Map</em>.</p>
+<p>Whenever application needs data for a particular user, it will check if data is available in <em>Cache</em>, otherwise it will retrieve the data from database, update the <em>Cache</em> with this new data and will return data from the <em>Cache</em>.</p>
+<p>Now the question arises ‘Is it improving the performance?’ Short answer is It Depends. If the table has few records only, it will work like charm. But, if the table holds large number of entries, it will cause <em>Cache</em> to increase linearly with the request. As, I stated earlier I know a bit about performance. I will cap the size of <em>Cache</em>, so that when max size is reached, oldest entries from <em>Cache</em> are evicted.</p>
+<p>Well, <em>Cache</em> size cap solves the problem partially only. What if, there are some entries in <em>Cache</em>, which are rarely used later on. These entries will eat up memory unnecessarily. So, the big question is ‘How should we delete these entries sitting in <em>Cache</em> which are not being used later on?’.</p>
+<p>As you have guessed, the answer is <strong>Reference Types</strong>.</p>
+<h2 id="I-can’t-wait-to-know-more-about-the-Reference-Types"><a href="#I-can’t-wait-to-know-more-about-the-Reference-Types" class="headerlink" title="I can’t wait to know more about the Reference Types"></a>I can’t wait to know more about the Reference Types</h2><p><code>java.lang.ref</code> package contains the below four reference types:</p>
+<ol>
+<li>Strong Reference</li>
+<li>Weak Reference</li>
+<li>Soft Reference</li>
+<li>Phantom Reference</li>
+</ol>
+<h4 id="Strong-Reference"><a href="#Strong-Reference" class="headerlink" title="Strong Reference"></a>Strong Reference</h4><p>You can see Strong Reference everywhere in Java. We create an object and then assign it to a reference.<br>Strong Reference is never <em>Garbage Collected</em>.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br></pre></td></tr></table></figure>
+<p>In the above snippet, <code>sb</code> is the Strong Reference to <code>StringBuilder</code> class object.</p>
+<h4 id="Weak-Reference"><a href="#Weak-Reference" class="headerlink" title="Weak Reference"></a>Weak Reference</h4><p>A Weak Reference, simply put, is a reference that isn’t strong enough to force an object to remain in memory. This type of reference is eligible for <em>Garbage Collection</em>.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line"></span><br><span class="line">WeakReference&lt;StringBuilder&gt; sbWeakRef = <span class="keyword">new</span> WeakReference&lt;&gt;(sb);</span><br><span class="line"></span><br><span class="line">sb = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<p>In the above snippet, <code>sbWeakRef</code> is the Weak Reference to <code>StringBuilder</code> class object. After nullifying the strong reference in the third line, the object immediately becomes eligible for GC.</p>
+<p>Well there are two different levels of weakness: <em>Soft</em> and <em>Phantom</em>.</p>
+<h4 id="Soft-Reference"><a href="#Soft-Reference" class="headerlink" title="Soft Reference"></a>Soft Reference</h4><p>A Soft Reference is basically a weak Reference Object that remains in memory as long as possible. _GC_ reclaims this memory only when it sees that there is no more memory to allocate for new objects and it is on brink of throwing <code>OutOfMemoryError</code>.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line"></span><br><span class="line">SoftReference&lt;StringBuilder&gt; sbSoftRef = <span class="keyword">new</span> SoftReference&lt;&gt;(sb);</span><br><span class="line"></span><br><span class="line">sb = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<p>In this phase, we can still retrieve a strong reference to the object by calling the get method of the SoftReference object, which returns null if the object is already collected:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sb = sbSoftRef.get();</span><br></pre></td></tr></table></figure>
+<h4 id="Phantom-Reference"><a href="#Phantom-Reference" class="headerlink" title="Phantom Reference"></a>Phantom Reference</h4><p>A Phantom Reference Object is useful only to know exactly when an object has been effectively removed from memory: normally they are used to fix weird <code>finalize()</code> <em>revival/resurrection</em> behavior, since they actually do not return the object itself but only help in keeping track of their memory presence.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line"></span><br><span class="line">ReferenceQueue&lt;StringBuilder&gt; refQ = <span class="keyword">new</span> ReferenceQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">PhantomReference&lt;StringBuilder&gt; sbPhantomRef = <span class="keyword">new</span> PhantomReference&lt;&gt;(sb, refQ);</span><br><span class="line"></span><br><span class="line">sb = <span class="keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<p>That’s it for now related to the <em>Reference Types</em> in Java. For <em>Concurrency</em> related problems, check my <a href="https://github.com/liquidpie/concurrency-java" target="_blank" rel="noopener">Github</a>.</p>
+</div></article></div></main><footer><div class="paginator"><a href="/2018/Click-Through-Rate-Prediction-Model/" class="next">NEXT</a></div><div class="grid"><div class="grid-row"><div class="grid-col-1"><div class="grid-block"><ul id="social"><li><a target="_blank" href="https://www.facebook.com/vivek223" class="social-icon facebook"></a></li><li><a target="_blank" href="https://www.linkedin.com/in/vivek223" class="social-icon linkedin"></a></li><li><a target="_blank" href="https://twitter.com/vivekjaiswal22" class="social-icon twitter"></a></li></ul></div></div><div class="grid-col-2"><div class="grid-block"><p>© 2018 <a target="_blank" href="https://about.me/vjaiswal">Vivek Jaiswal</a></p></div></div></div></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script><!-- - Google Maps--><script>function initLocation() {
+    var location = {lat: 12.908136, lng: 77.647608};
+    var style = [{"featureType":"all","elementType":"geometry.fill","stylers":[{"weight":"2.00"}]},{"featureType":"all","elementType":"geometry.stroke","stylers":[{"color":"#9c9c9c"}]},{"featureType":"all","elementType":"labels.text","stylers":[{"visibility":"on"}]},{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#34495e"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#42b983"}]},{"featureType":"administrative.neighborhood","elementType":"labels.text.fill","stylers":[{"color":"#626262"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#ffffff"},{"lightness":"0"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"color":"#f9f6f6"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"lightness":"0"},{"gamma":"1"},{"color":"#dddddd"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#efefef"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#000000"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#42b983"},{"visibility":"on"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#afa9a0"}]}];
+    var map = new google.maps.Map(document.getElementById('location'), {
+        zoom: 5,
+        center: location,
+        styles: style,
+        zoomControl: false,
+        mapTypeControl: false,
+        scaleControl: true,
+        streetViewControl: true,
+        rotateControl: true,
+        fullscreenControl: false
+    });
+    var marker = new google.maps.Marker({
+        position: location,
+        map: map
+    });
+}
+</script><script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRG9syuItXlrvznh-y3RM3xNrcBHzlHQk&amp;callback=initLocation"></script><script src="https://d3js.org/d3.v3.min.js"></script><script src="/script/d3relationship.js"></script><script>var json = [
+    { parent: 'Java', value: '11' },
+    { parent: 'Java', value: '21' },
+    { parent: 'Java', value: '31' },
+    { parent: 'Java', value: '41' },
+    { parent: 'Java', value: '51' },
+    { parent: 'Java', value: '61' },
+    { parent: 'Java', value: '71' },
+    { parent: 'Java', value: '81' },
+    { parent: 'Python', value: '11' },
+    { parent: 'Python', value: '21' },
+    { parent: 'Python', value: '31' },
+    { parent: 'Python', value: '41' },
+    { parent: 'Javascript', value: '11' },
+    { parent: 'Javascript', value: '21' },
+    { parent: 'Javascript', value: '31' },
+    { parent: 'Javascript', value: '41' },
+    { parent: 'Javascript', value: '51' },
+    { parent: 'NodeJS', value: '11' },
+    { parent: 'NodeJS', value: '21' },
+    { parent: 'NodeJS', value: '31' },
+    { parent: 'NodeJS', value: '41' },
+    { parent: 'NodeJS', value: '51' },
+    { parent: 'jQuery', value: '11' },
+    { parent: 'jQuery', value: '21' },
+    { parent: 'jQuery', value: '31' },
+    { parent: 'jQuery', value: '41' },
+    { parent: 'Spring Boot', value: '11' },
+    { parent: 'Spring Boot', value: '21' },
+    { parent: 'Spring Boot', value: '31' },
+    { parent: 'Spring Boot', value: '41' },
+    { parent: 'Spring Boot', value: '51' },
+    { parent: 'Spring Boot', value: '61' },
+    { parent: 'Apache Camel', value: '11' },
+    { parent: 'Apache Camel', value: '21' },
+    { parent: 'Apache Camel', value: '31' },
+    { parent: 'Apache Camel', value: '41' },
+    { parent: 'Apache Camel', value: '51' },
+    { parent: 'Apache Camel', value: '61' },
+    { parent: 'Apache Camel', value: '71' },
+    { parent: 'MongoDB', value: '11' },
+    { parent: 'MongoDB', value: '21' },
+    { parent: 'MongoDB', value: '31' },
+    { parent: 'MongoDB', value: '41' },
+    { parent: 'MongoDB', value: '51' },
+    { parent: 'MongoDB', value: '61' },
+    { parent: 'Redshift', value: '11' },
+    { parent: 'Redshift', value: '21' },
+    { parent: 'Redshift', value: '31' },
+    { parent: 'Redshift', value: '41' },
+    { parent: 'Redshift', value: '51' },
+    { parent: 'Redshift', value: '61' },
+    { parent: 'PostgreSQL', value: '11' },
+    { parent: 'PostgreSQL', value: '21' },
+    { parent: 'PostgreSQL', value: '31' },
+    { parent: 'PostgreSQL', value: '41' },
+    { parent: 'PostgreSQL', value: '51' },
+    { parent: 'PostgreSQL', value: '61' },
+    { parent: 'MySQL', value: '11' },
+    { parent: 'MySQL', value: '21' },
+    { parent: 'MySQL', value: '31' },
+    { parent: 'MySQL', value: '41' },
+    { parent: 'MySQL', value: '51' },
+    { parent: 'MySQL', value: '61' },
+    { parent: 'MySQL', value: '71' },
+    { parent: 'Redis', value: '11' },
+    { parent: 'Redis', value: '21' },
+    { parent: 'Redis', value: '31' },
+    { parent: 'Redis', value: '41' },
+    { parent: 'Redis', value: '51' },
+    { parent: 'Redis', value: '61' },
+    { parent: 'Jersey', value: '11' },
+    { parent: 'Jersey', value: '21' },
+    { parent: 'Jersey', value: '31' },
+    { parent: 'Jersey', value: '41' },
+    { parent: 'Jersey', value: '51' },
+    { parent: 'Jersey', value: '61' },
+    { parent: 'Machine Learning', value: '11' },
+    { parent: 'Machine Learning', value: '21' },
+    { parent: 'Machine Learning', value: '31' }
+];
+
+var graph = d3.select('#skillgraph').relationshipGraph({
+    showTooltips: false,
+    maxChildCount: 10,
+    showKeys: false,
+    thresholds: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    colors: ['#c4ffe4', '#a6edcc', '#92e8c0', '#8ae2b9', '#75d6a9', '#71d6a7', '#61c697', '#5fce9b', '#52c490', '#42b983']
+}).data(json);</script></body></html>
