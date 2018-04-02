@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://liquidpie.github.io/2018/Building-LRU-Least-Recently-Used-Cache/</loc>
+    
+    <lastmod>2018-04-02T11:40:51.413Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://liquidpie.github.io/2018/Click-Through-Rate-Prediction-Model/</loc>
     
     <lastmod>2018-03-07T17:33:33.717Z</lastmod>

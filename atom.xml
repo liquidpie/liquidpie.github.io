@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://liquidpie.github.io/"/>
-  <updated>2018-03-07T17:31:23.636Z</updated>
+  <updated>2018-04-02T11:40:51.413Z</updated>
   <id>https://liquidpie.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Building LRU (Least Recently Used) Cache</title>
+    <link href="https://liquidpie.github.io/2018/Building-LRU-Least-Recently-Used-Cache/"/>
+    <id>https://liquidpie.github.io/2018/Building-LRU-Least-Recently-Used-Cache/</id>
+    <published>2018-04-02T11:31:53.000Z</published>
+    <updated>2018-04-02T11:40:51.413Z</updated>
+    
+    <content type="html"><![CDATA[<p>What’s a Cache?</p><p>According to wikipedia, </p><p>A cache is a hardware or software component that stores data so future requests for that data can be served faster; the data stored in a cache might be the result of an earlier computation, or the duplicate of data stored elsewhere.</p><p>Here, I’ll talk about specific type of software cache.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;What’s a Cache?&lt;/p&gt;
+&lt;p&gt;According to wikipedia, &lt;/p&gt;
+&lt;p&gt;A cache is a hardware or software component that stores data so future requests fo
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>Java Reference Types</title>
